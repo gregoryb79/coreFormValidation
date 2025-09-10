@@ -31,5 +31,15 @@ namespace coreFormValidation.Controllers
             ViewBag.Password = login.Password;
             return View("LoginPost");          
         }
+
+        public IActionResult UserDetail()
+        {
+            var user = new LoginViewModel()
+            {
+                Username = "JohnDoe",
+                Password = "Secure"
+            };
+            return View(user);
+        }
     }
 }
