@@ -24,4 +24,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("=== Startup log test ===");
+
 app.Run();

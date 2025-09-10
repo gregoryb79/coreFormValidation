@@ -1,11 +1,19 @@
 ﻿using coreFormValidation.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 
 namespace coreFormValidation.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(ILogger<AccountController> logger) 
+        { 
+            _logger = logger; 
+        }
+
         public IActionResult WeeklyTypedLogin()
         {
             return View();
@@ -51,6 +59,34 @@ namespace coreFormValidation.Controllers
                 new LoginViewModel { Username = "Charlie", Password = "Password3" }
             };
             return View(users);
+        }
+
+        public IActionResult GetAccount()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult PostAccount(Account account)
+        {
+
+            _logger.LogInformation($"Username: {account.Username}");
+            _logger.LogInformation($"Password: {account.Password}");
+            _logger.LogInformation($"Age: {account.Age}");
+            _logger.LogInformation($"Email: {account.Email}");
+            _logger.LogInformation($"Website: {account.Website}");
+            if (ModelState.IsValid)
+            {
+                ViewBag.Message = "Account created successfully!";
+                return View("Success");
+            }
+            else
+            {
+                _logger.LogInformation("Validation Errors:");
+                ViewBag.Message = "There are validation errors.";
+                return RedirectToAction("GetAccount");
+            }
+            
         }
     }
 }
