@@ -1,8 +1,64 @@
-﻿@{
+﻿@model coreFormValidation.Models.ToDoListViewModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
+<link rel="stylesheet" href="~/css/index.css" />
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <div class="errorMessage" @(ViewBag.ErrorMessage == null ? "hidden" : "")>
+        <h3>Error</h3>
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger">
+                <p>@ViewBag.ErrorMessage</p>
+                @Html.ValidationMessageFor(model => model.NewItem.Task, "", new { @class = "text-danger" })
+            </div>
+        }
+    </div>
+
+    <h1 class="display-4">Basic Form App</h1>
+    <p>Create a To-Do List</p>
+
+    @using (Html.BeginForm("AddItem", "Home", FormMethod.Post))
+    {
+        <div class="inputForm">
+
+            @Html.TextBoxFor(model => model.NewItem.Task, new { @class = "inputField" })
+            
+            <input type="submit" value="Add Task" />            
+        </div>    
+    } 
+        
+    @if(Model.Items.Count > 0)
+    {
+        
+        <ul class="taskList">
+            @foreach (var item in Model.Items)
+            {
+                <li class="taskRow">
+                   
+                    @using (Html.BeginForm("ToggleCompleted", "Home", FormMethod.Post))
+                    {
+                        <input type="hidden" name="id" value="@item.ID" />
+                        <input type="checkbox" name="isCompleted" value="true" @(item.IsCompleted ? "checked" : "") onchange="this.form.submit()" />
+                        @Html.DisplayFor(_ => item.Task)
+                    }
+                    
+                    @using (Html.BeginForm("RemoveItem", "Home", FormMethod.Post))
+                    {
+                        <input type="hidden" name="id" value="@item.ID" />
+                        <button type="submit">Remove</button>
+                    }
+                </li>
+            }
+        </ul>
+    }else{
+        <h3>No tasks added yet....</h3>
+    }
+
+    
+
 </div>
