@@ -63,6 +63,8 @@ namespace coreFormValidation.Controllers
 
         public IActionResult GetAccount()
         {
+            _logger.LogInformation("Rendering GetAccount view.");
+            Console.WriteLine("Rendering GetAccount view.");
             return View();
         }
 
@@ -84,7 +86,7 @@ namespace coreFormValidation.Controllers
             {
                 _logger.LogInformation("Validation Errors:");
                 ViewBag.Message = "There are validation errors.";
-                return RedirectToAction("GetAccount");
+                return View("GetAccount");
             }
             
         }

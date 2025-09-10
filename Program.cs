@@ -26,5 +26,6 @@ app.MapControllerRoute(
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("=== Startup log test ===");
+Console.WriteLine("=== Console log test ===");
 
 app.Run();
