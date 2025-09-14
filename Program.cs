@@ -1,7 +1,16 @@
+using coreFormValidation.Models;
+using coreFormValidation.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
+
+// Add this line to register MongoDbService as a singleton
+builder.Services.AddSingleton<MongoDbService>();
 
 var app = builder.Build();
 

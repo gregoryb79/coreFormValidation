@@ -42,14 +42,14 @@
                    
                     @using (Html.BeginForm("ToggleCompleted", "Home", FormMethod.Post))
                     {
-                        <input type="hidden" name="id" value="@item.ID" />
+                        <input type="hidden" name="id" value="@item._id" />
                         <input type="checkbox" name="isCompleted" value="true" @(item.IsCompleted ? "checked" : "") onchange="this.form.submit()" />
                         @Html.DisplayFor(_ => item.Task)
                     }
                     
                     @using (Html.BeginForm("RemoveItem", "Home", FormMethod.Post))
                     {
-                        <input type="hidden" name="id" value="@item.ID" />
+                        <input type="hidden" name="id" value="@item._id" />
                         <button type="submit">Remove</button>
                     }
                 </li>
