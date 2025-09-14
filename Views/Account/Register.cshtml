@@ -1,0 +1,41 @@
+﻿@model coreFormValidation.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register Page";
+}
+
+<link rel="stylesheet" href="~/css/login.css" />
+
+<div class="text-center">
+
+    <div class="errorMessage" @(ViewBag.ErrorMessage == null ? "hidden" : "")>
+        <h3>Error</h3>
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger">
+                <p>@ViewBag.ErrorMessage</p>
+                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+            </div>
+        }
+    </div>
+
+    <h1 class="display-4">Register</h1>
+    <p>please register</p>
+
+    @using (Html.BeginForm("RegisterPost", "Account", FormMethod.Post))
+    {
+        <div class="logInForm">
+
+            @Html.TextBoxFor(model => model.eMail, new { @class = "inputField", placeholder = "Enter your e-mail" })
+            @Html.PasswordFor(model => model.Password, new { @class = "inputField", placeholder = "Enter password" })
+            @Html.PasswordFor(model => model.ConfirmPassword, new { @class = "inputField", placeholder = "Repeat password" })
+
+            <input type="submit" value="Register" />
+        </div>        
+    }
+
+
+
+
+
+</div>

@@ -50,7 +50,7 @@ namespace coreFormValidation.Controllers
             {
                 Console.WriteLine("Validation error!");
                 ViewBag.ErrorMessage = "Wrong Input";
-                //model.Items = _toDoList;
+                model.Items = _toDoList;
                 return View("Index");
             }
             model.NewItem._id = Guid.NewGuid().ToString();
