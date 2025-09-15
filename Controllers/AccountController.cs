@@ -35,7 +35,7 @@ namespace coreFormValidation.Controllers
         }
 
         [HttpPost]
-        public IActionResult LoginPost(LoginViewModel loginData)
+        public async Task<IActionResult> LoginPost(LoginViewModel loginData)
         {
             Console.WriteLine($"e-mail: {loginData.eMail}, password: {loginData.Password}");
             if (!ModelState.IsValid)
@@ -44,8 +44,34 @@ namespace coreFormValidation.Controllers
                 ViewBag.ErrorMessage = "Wrong Input";                
                 return View("Login",loginData);
             }
+            var existingUser = _mongoService.GetAllAccounts().FirstOrDefault(user => user.eMail == loginData.eMail);
+            if (existingUser == null)
+            {
+                Console.WriteLine("User not found");
+                ViewBag.ErrorMessage = "Wrong Credentials";
+                ModelState.AddModelError("eMail", "E-mail or Password incorrect");
+                return View("Login", loginData);
+            }
+            var verificationResult = _hasher.VerifyHashedPassword(null, existingUser.hashedPassword, loginData.Password);
+            if (verificationResult == PasswordVerificationResult.Failed)
+            {
+                Console.WriteLine("Wrong Password");
+                ViewBag.ErrorMessage = "Wrong Credentials";
+                ModelState.AddModelError("eMail", "E-mail or Password incorrect");
+                return View("Login", loginData);
+            }
 
-            return View("Login",loginData);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, existingUser.eMail),
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Index", "Home");
         }
         [HttpPost]
         public async Task<IActionResult> RegisterPost(RegisterViewModel registerData)
@@ -83,7 +109,7 @@ namespace coreFormValidation.Controllers
             return RedirectToAction("Index", "Home");
         }    
 
-        [HttpPost]
+        //[HttpPost]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

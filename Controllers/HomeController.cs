@@ -1,5 +1,6 @@
 using coreFormValidation.Models;
 using coreFormValidation.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -18,9 +19,22 @@ namespace coreFormValidation.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
+            var userEmail = User.Identity?.Name ?? "unknown";
+            Console.WriteLine($"User {userEmail} accessed the To-Do list.");
+            var taskIds = _mongoService.GetAllAccounts()
+                .FirstOrDefault(user => user.eMail == userEmail)?.ToDoItemsIDs;
+            if (taskIds == null || taskIds.Length == 0)
+            {
+                Console.WriteLine("No tasks found for this user.");
+                var newModel = new ToDoListViewModel();
+                return View(newModel);
+            }
+
             var sortedList = _mongoService.GetAll()
+                .Where(item => taskIds != null && taskIds.Contains(item._id))
                 .OrderBy(item => item.IsCompleted) // false first, then true
                 .ToList();
             
@@ -38,6 +52,7 @@ namespace coreFormValidation.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult AddItem(ToDoListViewModel model)
         {
             Console.WriteLine($"Received Task: {model.NewItem.Task}, IsCompleted: {model.NewItem.IsCompleted} createdAt: {model.NewItem.CreatedAt}");
@@ -53,13 +68,26 @@ namespace coreFormValidation.Controllers
                 model.Items = _toDoList;
                 return View("Index");
             }
+
             model.NewItem._id = Guid.NewGuid().ToString();
             _mongoService.Add(model.NewItem);            
+
+            var account = _mongoService.GetAllAccounts()
+                .FirstOrDefault(user => user.eMail == User.Identity?.Name);
+            if (account == null)
+            { 
+                Console.WriteLine("Account not found for the current user.");
+                return RedirectToAction("Index");
+            }
+            account.ToDoItemsIDs = (account.ToDoItemsIDs ?? Array.Empty<string>()).Append(model.NewItem._id).ToArray();
+            _mongoService.UpdateAccount(account._id, account);
+            
 
             return RedirectToAction("Index");
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult ToggleCompleted(string id, bool isCompleted)
         {   
             Console.WriteLine($"Toggling item {id} to {(isCompleted ? "completed" : "not completed")}");
@@ -75,6 +103,7 @@ namespace coreFormValidation.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult RemoveItem(string id)
         {
             Console.WriteLine($"Removing item {id}");
@@ -83,7 +112,14 @@ namespace coreFormValidation.Controllers
             //{
                 _mongoService.Delete(id);
             //}
-            
+            var account = _mongoService.GetAllAccounts()
+                .FirstOrDefault(user => user.eMail == User.Identity?.Name);
+            if (account != null && account.ToDoItemsIDs != null && account.ToDoItemsIDs.Contains(id))
+            {
+                account.ToDoItemsIDs = account.ToDoItemsIDs.Where(itemId => itemId != id).ToArray();
+                _mongoService.UpdateAccount(account._id, account);
+            }
+
             return RedirectToAction("Index");
         }
 

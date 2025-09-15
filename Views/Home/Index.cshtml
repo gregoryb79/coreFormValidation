@@ -19,8 +19,8 @@
         }
     </div>
 
-    <h1 class="display-4">Basic Form App</h1>
-    <p>Create a To-Do List</p>
+    <h1 class="display-4">To Do List App</h1>
+    <p>@User.Identity.Name's task list:</p>
 
     @using (Html.BeginForm("AddItem", "Home", FormMethod.Post))
     {
@@ -56,7 +56,15 @@
             }
         </ul>
     }else{
-        <h3>No tasks added yet....</h3>
+        @if (User.Identity.IsAuthenticated)
+        {           
+    
+            <h3>No tasks added yet....</h3>
+        }
+        else
+        {
+            <h3>Please log in to manage your tasks</h3>
+        }
     }
 
     
